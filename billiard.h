@@ -1,6 +1,8 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include "meja.h"
+#include "stik.h"
+#include "pemain.h"
 
 class Billiard {
 public:
@@ -8,11 +10,25 @@ public:
     void jalan();
 
 private:
+    enum class Status { Menu, Bermain };
+
     sf::RenderWindow window;
     Meja meja;
-    sf::Clock jam; //untuk hitung dt
+    Stik stik;
+    PemainManusia pemain;
+    sf::Clock jam; 
+
+    Status status = Status::Menu;
+    sf::Font font;
+    bool adaFont = false;
+    sf::FloatRect tombolMulai;   
+    bool hoverTombol = false;
 
     void prosesEvent();
-    void update(float dt); 
+    void update(float dt);
     void render();
+
+    // layar menu
+    void renderMenu();
+    void mulaiGame();
 };

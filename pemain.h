@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <SFML/System.hpp>
 #include "jenis.h"
 
 class Meja;
@@ -71,7 +72,9 @@ class PemainManusia : public Pemain {
                         Tembakan& hasil) override;
 
     private:
-        bool menahan = false; //ngecek apakah mouse lg ditahan or not
+        bool  menahan = false;  
+        float kekuatan = 0.f;    
+        sf::Clock jamIsi;       
 };
 
 class PemainBot : public Pemain {
