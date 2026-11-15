@@ -188,15 +188,10 @@ void Billiard::renderMenu() {
                    tombolMulai.top + tombolMulai.height / 2.f);
         window.draw(labelTombol);
 
-        sf::Text i1("Arahkan mouse ke tujuan  -  tahan klik kiri untuk tenaga", font, 15);
+        sf::Text i1("Selamat datang di Game Billiard dan Selamat Bermain!", font, 15);
         i1.setFillColor(sf::Color(150, 156, 168));
         teksTengah(i1, 500.f, 424.f);
         window.draw(i1);
-
-        sf::Text i2("Lepas klik untuk menembak    -    tekan Enter untuk mulai", font, 15);
-        i2.setFillColor(sf::Color(150, 156, 168));
-        teksTengah(i2, 500.f, 448.f);
-        window.draw(i2);
     }
 
     window.display();
