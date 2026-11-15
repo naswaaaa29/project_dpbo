@@ -10,7 +10,9 @@ public:
 private:
     sf::RenderWindow window;
     Meja meja;
+    sf::Clock jam; //untuk hitung dt
 
     void prosesEvent();
+    void update(float dt); 
     void render();
 };

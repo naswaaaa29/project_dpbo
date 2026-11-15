@@ -9,7 +9,10 @@ Billiard::Billiard()
 
 void Billiard::jalan() {
     while (window.isOpen()) {
+        float dt = jam.restart().asSeconds();
+        if (dt > 0.05f) dt = 0.05f;
         prosesEvent();
+        update(dt);
         render();
     }
 }
@@ -20,6 +23,10 @@ void Billiard::prosesEvent() {
         if (event.type == sf::Event::Closed)
             window.close();
     }
+}
+
+void Billiard::update(float dt){
+    meja.update(dt);
 }
 
 void Billiard::render() {

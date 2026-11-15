@@ -1,4 +1,5 @@
 #include "bola.h"
+#include <cmath>
 
 Bola::Bola(int nomor, Jenis jenis, sf::Vector2f posisi)
     : nomorBola(nomor), jenisBola(jenis), pos(posisi) {}
@@ -17,9 +18,22 @@ sf::Color Bola::warnaDasar() const {
 }
 
 void Bola::gerak(float dt) {
-    // TODO minggu ke-3+ : pos += vel*dt, gesekan, pantulan dinding
+    // TODO minggu ke-4 : tabraan bola dengan dinding
     if (!aktif) return;
+    
+    //1. Mindahin bola sesuai kecepatan saat ini
     pos += vel * dt;
+
+    //2. Laju berkurang setiap detik, arah geraknya ga berubah
+    float laju = std::sqrt(vel.x * vel.x + vel.y * vel.y);
+    if (laju == 0.f) return;
+
+    float lajuBaru = laju - perlambatan * dt;
+    if (lajuBaru < lajuBerhenti){
+        vel = {0.f, 0.f};
+    } else{
+        vel = vel * (lajuBaru / laju); //bikin laju lebih kecil
+    }
 }
 
 void Bola::gambar(sf::RenderWindow& window) const {

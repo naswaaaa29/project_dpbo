@@ -15,6 +15,7 @@ public:
     std::vector<Bola>&       daftarBola()       { return bola; }
     const std::vector<Bola>& daftarBola() const { return bola; }
     Bola* bolaPutih();
+    bool semuaBolaBerhenti() const; //true jika ga ada bola yang bergerak
 
     sf::FloatRect areaMain() const;        // area hijau (dalam bantalan)
 

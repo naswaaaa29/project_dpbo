@@ -58,8 +58,16 @@ void Meja::susunBola() {
 }
 
 void Meja::update(float dt) {
-    // TODO minggu ke-3+ : gerak tiap bola, gesekan, tabrakan, cek lubang
+    // TODO minggu ke-4 : tabrakan dan cek lubang
+    //Note: gerak bola + gesekan ada di Bola::gerak
     for (auto& b : bola) b.gerak(dt);
+}
+
+bool Meja::semuaBolaBerhenti() const{
+    for (const auto& b : bola){
+        if (b.bergerak()) return false;
+    }
+    return true;
 }
 
 Bola* Meja::bolaPutih() {

@@ -1,6 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "Jenis.h"
+#include "jenis.h"
 
 class Bola;
 
