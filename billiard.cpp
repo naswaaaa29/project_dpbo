@@ -49,6 +49,8 @@ Billiard::Billiard()
     meja.susunBola();
 
     tombolMulai = sf::FloatRect(380.f, 330.f, 240.f, 62.f);
+    tombolLanjut = sf::FloatRect(530.f, 450.f, 200.f, 55.f);
+	tombolKembali = sf::FloatRect(270.f, 450.f, 200.f, 55.f);
 
     adaFont =
         font.loadFromFile("C:/Windows/Fonts/segoeuib.ttf") ||
@@ -70,6 +72,7 @@ void Billiard::jalan() {
 void Billiard::prosesEvent() {
     sf::Event event;
     while (window.pollEvent(event)) {
+
         if (event.type == sf::Event::Closed) {
             window.close();
             continue;
@@ -77,18 +80,59 @@ void Billiard::prosesEvent() {
 
         if (status == Status::Menu) {
             if (event.type == sf::Event::MouseMoved) {
-                sf::Vector2f m((float)event.mouseMove.x, (float)event.mouseMove.y);
+                sf::Vector2f m(
+                    (float)event.mouseMove.x,
+                    (float)event.mouseMove.y
+                );
+
                 hoverTombol = tombolMulai.contains(m);
             }
+
             else if (event.type == sf::Event::MouseButtonReleased &&
                      event.mouseButton.button == sf::Mouse::Left) {
-                sf::Vector2f m((float)event.mouseButton.x, (float)event.mouseButton.y);
-                if (tombolMulai.contains(m)) mulaiGame();
+
+                sf::Vector2f m(
+                    (float)event.mouseButton.x,
+                    (float)event.mouseButton.y
+                );
+
+                if (tombolMulai.contains(m)) {
+                    status = Status::Aturan;
+                }
             }
+
             else if (event.type == sf::Event::KeyPressed &&
                      (event.key.code == sf::Keyboard::Return ||
                       event.key.code == sf::Keyboard::Space)) {
-                mulaiGame();
+
+                status = Status::Aturan;
+            }
+        }
+
+        else if (status == Status::Aturan) {
+            if (event.type == sf::Event::MouseMoved) {
+                sf::Vector2f m(
+                    (float)event.mouseMove.x,
+                    (float)event.mouseMove.y
+                );
+                hoverLanjut = tombolLanjut.contains(m);
+                hoverKembali = tombolKembali.contains(m);
+            }
+
+            else if (event.type == sf::Event::MouseButtonReleased &&
+                     event.mouseButton.button == sf::Mouse::Left) {
+                sf::Vector2f m(
+                    (float)event.mouseButton.x,
+                    (float)event.mouseButton.y
+                );
+
+                if (tombolKembali.contains(m)) {
+                    status = Status::Menu;
+                }
+
+                else if (tombolLanjut.contains(m)) {
+                    mulaiGame();
+                }
             }
         }
     }
@@ -126,6 +170,10 @@ void Billiard::render() {
         renderMenu();
         return;
     }
+    if (status == Status::Aturan) {
+        renderAturan();
+        return;
+    }
 
     window.clear(sf::Color(40, 42, 48));
     meja.gambar(window);
@@ -133,6 +181,124 @@ void Billiard::render() {
     if (meja.semuaBolaBerhenti()) {
         if (Bola* putih = meja.bolaPutih())
             stik.gambar(window, *putih);
+    }
+
+    window.display();
+}
+
+
+void Billiard::renderAturan() {
+
+    window.clear(sf::Color(24, 26, 34));
+
+    // Kartu utama
+    sf::FloatRect kartu(180.f, 80.f, 640.f, 440.f);
+
+    gambarRoundRect(
+        window,
+        kartu,
+        24.f,
+        sf::Color(32, 35, 45, 240)
+    );
+
+    if (adaFont) {
+
+        // Judul
+        sf::Text judul("GAME RULES", font, 42);
+        judul.setFillColor(sf::Color(46, 204, 113));
+        teksTengah(judul, 500.f, 135.f);
+        window.draw(judul);
+
+        // Rules 1
+        sf::Text r1("OBJECTIVE", font, 22);
+        r1.setFillColor(sf::Color::White);
+        r1.setPosition(250.f, 195.f);
+        window.draw(r1);
+
+        sf::Text d1(
+            "Masukkan bola ke dalam lubang untuk memenangkan permainan.",
+            font, 15
+        );
+        d1.setFillColor(sf::Color(190, 195, 205));
+        d1.setPosition(250.f, 228.f);
+        window.draw(d1);
+
+        // Rules 2
+        sf::Text r2("HOW TO PLAY", font, 22);
+        r2.setFillColor(sf::Color::White);
+        r2.setPosition(250.f, 280.f);
+        window.draw(r2);
+
+        sf::Text d2(
+            "Arahkan stik dan lakukan tembakan untuk memasukkan bola.",
+            font, 15
+        );
+        d2.setFillColor(sf::Color(190, 195, 205));
+        d2.setPosition(250.f, 313.f);
+        window.draw(d2);
+
+        // Rules 3
+        sf::Text r3("GAME TIPS", font, 22);
+        r3.setFillColor(sf::Color::White);
+        r3.setPosition(250.f, 365.f);
+        window.draw(r3);
+
+        sf::Text d3(
+            "Atur arah dan kekuatan tembakan dengan hati-hati.",
+            font, 15
+        );
+        d3.setFillColor(sf::Color(190, 195, 205));
+        d3.setPosition(250.f, 398.f);
+        window.draw(d3);
+    }
+
+    // Tombol BACK
+    sf::Color warnaBack = hoverKembali
+        ? sf::Color(100, 110, 120)
+        : sf::Color(75, 85, 95);
+
+    gambarRoundRect(
+        window,
+        tombolKembali,
+        12.f,
+        warnaBack
+    );
+
+    // Tombol START GAME
+    sf::Color warnaLanjut = hoverLanjut
+        ? sf::Color(46, 204, 113)
+        : sf::Color(39, 174, 96);
+
+    gambarRoundRect(
+        window,
+        tombolLanjut,
+        12.f,
+        warnaLanjut
+    );
+
+    if (adaFont) {
+
+        sf::Text back("BACK", font, 20);
+        back.setFillColor(sf::Color::White);
+
+        teksTengah(
+            back,
+            tombolKembali.left + tombolKembali.width / 2.f,
+            tombolKembali.top + tombolKembali.height / 2.f
+        );
+
+        window.draw(back);
+
+        sf::Text lanjut("START GAME", font, 20);
+        lanjut.setFillColor(sf::Color::White);
+
+        teksTengah(
+            lanjut,
+            tombolLanjut.left + tombolLanjut.width / 2.f,
+            tombolLanjut.top + tombolLanjut.height / 2.f
+        );
+
+        window.draw(lanjut);
     }
 
     window.display();
