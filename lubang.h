@@ -1,17 +1,16 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-
-class Bola;
+#include "bola.h"
 
 class Lubang {
 public:
-    Lubang(sf::Vector2f posisi, float radius) : pos(posisi), jari(radius) {}
+    Lubang(sf::Vector2f posisi, float radius);
 
-    bool cekMasuk(const Bola& b) const;
     void gambar(sf::RenderWindow& window) const;
+    bool cekBolaMasuk(const Bola& bola) const;
 
     sf::Vector2f posisi() const { return pos; }
-    float radius() const        { return jari; }
+    float radius() const { return jari; }
 
 private:
     sf::Vector2f pos;

@@ -20,6 +20,7 @@ public:
     void setPosisi(sf::Vector2f p)    { pos = p; }
     void setKecepatan(sf::Vector2f v) { vel = v; }
     void masukkan()                   { aktif = false; vel = {0.f, 0.f}; }
+    void kembaliKeMeja(sf::Vector2f p) { pos = p; vel = {0.f, 0.f}; aktif = true; }
 
 private:
     int   nomorBola;

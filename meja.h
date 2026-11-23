@@ -17,6 +17,10 @@ public:
     Bola* bolaPutih();
     bool semuaBolaBerhenti() const; //true jika ga ada bola yang bergerak
 
+    // Nomor bola yang masuk lubang sejak panggilan terakhir.
+    // Dipakai nanti oleh Aturan / Billiard untuk skor dan giliran.
+    std::vector<int> ambilBolaMasuk();
+
     sf::FloatRect areaMain() const;        // area hijau (dalam bantalan)
 
 private:
@@ -26,6 +30,9 @@ private:
 
     std::vector<Bola>   bola;
     std::vector<Lubang> lubang;
+    std::vector<int>    masukTerakhir; // nomor bola yang baru masuk lubang
 
     void buatLubang();
+    void cekLubang();
+    sf::Vector2f posisiAwalPutih() const;
 };

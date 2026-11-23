@@ -29,6 +29,7 @@ void Meja::buatLubang() {
 
 void Meja::susunBola() {
     bola.clear();
+    masukTerakhir.clear();
     sf::FloatRect m = areaMain();
     float cy = m.top + m.height / 2.f;
     float r = 11.f;
@@ -58,9 +59,37 @@ void Meja::susunBola() {
 }
 
 void Meja::update(float dt) {
-    // TODO minggu ke-4 : tabrakan dan cek lubang
-    //Note: gerak bola + gesekan ada di Bola::gerak
     for (auto& b : bola) b.gerak(dt);
+    cekLubang();
+}
+
+void Meja::cekLubang() {
+    for (auto& b : bola) {
+        if (!b.diMeja()) continue;
+        for (const auto& l : lubang) {
+            if (l.cekBolaMasuk(b)) {
+                if (b.jenis() == Jenis::putih) {
+                    b.kembaliKeMeja(posisiAwalPutih());
+                } else {
+                    masukTerakhir.push_back(b.nomor());
+                    b.masukkan();
+                }
+                break;
+            }
+        }
+    }
+}
+
+sf::Vector2f Meja::posisiAwalPutih() const {
+    sf::FloatRect m = areaMain();
+    float cy = m.top + m.height / 2.f;
+    return {m.left + m.width * 0.25f, cy};
+}
+
+std::vector<int> Meja::ambilBolaMasuk() {
+    std::vector<int> hasil = masukTerakhir;
+    masukTerakhir.clear();
+    return hasil;
 }
 
 bool Meja::semuaBolaBerhenti() const{
@@ -77,12 +106,12 @@ Bola* Meja::bolaPutih() {
 }
 
 void Meja::gambar(sf::RenderWindow& window) const {
-    sf::RectangleShape bingkai(ukuran);               // kayu
+    sf::RectangleShape bingkai(ukuran); // kayu
     bingkai.setPosition(pos);
     bingkai.setFillColor(sf::Color(101, 67, 33));
     window.draw(bingkai);
 
-    sf::FloatRect m = areaMain();                     // kain hijau
+    sf::FloatRect m = areaMain(); // kain hijau
     sf::RectangleShape kain({m.width, m.height});
     kain.setPosition(m.left, m.top);
     kain.setFillColor(sf::Color(39, 119, 61));
