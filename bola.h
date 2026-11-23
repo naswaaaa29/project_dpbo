@@ -17,6 +17,8 @@ public:
     bool  diMeja() const           { return aktif; }
     bool bergerak() const          { return aktif && (vel.x != 0.f || vel.y != 0.f);}
 
+    bool tabrak(Bola& lain);
+
     void setPosisi(sf::Vector2f p)    { pos = p; }
     void setKecepatan(sf::Vector2f v) { vel = v; }
     void masukkan()                   { aktif = false; vel = {0.f, 0.f}; }
@@ -33,6 +35,8 @@ private:
     //Untuk gesekan bolanya
     float perlambatan = 350.f;
     float lajuBerhenti = 8.f;
+
+    float restitusi = 0.96f;
 
     sf::Color warnaDasar() const;
 };

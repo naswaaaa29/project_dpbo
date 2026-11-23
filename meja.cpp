@@ -59,8 +59,22 @@ void Meja::susunBola() {
 }
 
 void Meja::update(float dt) {
-    for (auto& b : bola) b.gerak(dt);
-    cekLubang();
+    const float langkahMaks = 1.f / 120.f;
+    int jumlahLangkah = (int)std::ceil(dt / langkahMaks);
+    if (jumlahLangkah < 1) jumlahLangkah = 1;
+    float h = dt / jumlahLangkah;
+
+    for(int i = 0; i < jumlahLangkah; ++i){
+        for (auto& b : bola) b.gerak(h);
+        cekTabrakanBola();
+        cekLubang();
+    }
+}
+
+void Meja::cekTabrakanBola() {
+    for (size_t i = 0; i < bola.size(); ++i)
+        for (size_t j = i + 1; j < bola.size(); ++j)
+            bola[i].tabrak(bola[j]);
 }
 
 void Meja::cekLubang() {

@@ -34,5 +34,6 @@ private:
 
     void buatLubang();
     void cekLubang();
+    void cekTabrakanBola();
     sf::Vector2f posisiAwalPutih() const;
 };

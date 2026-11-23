@@ -36,6 +36,35 @@ void Bola::gerak(float dt) {
     }
 }
 
+bool Bola::tabrak(Bola& lain) {
+    if (!aktif || !lain.aktif) return false;
+
+    //Apakah kedua bola bersentuhan
+    sf::Vector2f d = lain.pos - pos;
+    float jarak = std::sqrt(d.x * d.x + d.y * d.y);
+    float jarakMin = jari + lain.jari;
+    if (jarak >= jarakMin) return false;
+
+    //Arah tumbukan
+    sf::Vector2f n(1.f, 0.f);
+    if (jarak > 0.0001f) n = d * (1.f / jarak);
+
+    //Pisahin bola yang saling tumpang tindih, masing-masing setengahnya
+    float tumpang = jarakMin - jarak;
+    pos -= n * (tumpang / 2.f);
+    lain.pos += n * (tumpang / 2.f);
+
+    //Seberapa cepat keduanya saling mendekat
+    float vRel = (vel.x - lain.vel.x) * n.x + (vel.y - lain.vel.y) * n.y;
+    if (vRel <= 0.f) return false;
+
+    //Pertukaran kecepatan searah n
+    float impuls = vRel * (1.f + restitusi) / 2.f;
+    vel -= n * impuls;
+    lain.vel += n * impuls;
+    return true;
+}
+
 void Bola::gambar(sf::RenderWindow& window) const {
     if (!aktif) return;
 
