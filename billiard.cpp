@@ -188,10 +188,7 @@ void Billiard::render() {
 
 
 void Billiard::renderAturan() {
-
     window.clear(sf::Color(24, 26, 34));
-
-    // Kartu utama
     sf::FloatRect kartu(180.f, 80.f, 640.f, 440.f);
 
     gambarRoundRect(
@@ -202,14 +199,11 @@ void Billiard::renderAturan() {
     );
 
     if (adaFont) {
-
-        // Judul
         sf::Text judul("GAME RULES", font, 42);
         judul.setFillColor(sf::Color(46, 204, 113));
         teksTengah(judul, 500.f, 135.f);
         window.draw(judul);
 
-        // Rules 1
         sf::Text r1("OBJECTIVE", font, 22);
         r1.setFillColor(sf::Color::White);
         r1.setPosition(250.f, 195.f);
@@ -223,7 +217,6 @@ void Billiard::renderAturan() {
         d1.setPosition(250.f, 228.f);
         window.draw(d1);
 
-        // Rules 2
         sf::Text r2("HOW TO PLAY", font, 22);
         r2.setFillColor(sf::Color::White);
         r2.setPosition(250.f, 280.f);
@@ -237,7 +230,6 @@ void Billiard::renderAturan() {
         d2.setPosition(250.f, 313.f);
         window.draw(d2);
 
-        // Rules 3
         sf::Text r3("GAME TIPS", font, 22);
         r3.setFillColor(sf::Color::White);
         r3.setPosition(250.f, 365.f);
@@ -252,7 +244,6 @@ void Billiard::renderAturan() {
         window.draw(d3);
     }
 
-    // Tombol BACK
     sf::Color warnaBack = hoverKembali
         ? sf::Color(100, 110, 120)
         : sf::Color(75, 85, 95);
@@ -264,7 +255,6 @@ void Billiard::renderAturan() {
         warnaBack
     );
 
-    // Tombol START GAME
     sf::Color warnaLanjut = hoverLanjut
         ? sf::Color(46, 204, 113)
         : sf::Color(39, 174, 96);
@@ -277,7 +267,6 @@ void Billiard::renderAturan() {
     );
 
     if (adaFont) {
-
         sf::Text back("BACK", font, 20);
         back.setFillColor(sf::Color::White);
 

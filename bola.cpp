@@ -36,6 +36,38 @@ void Bola::gerak(float dt) {
     }
 }
 
+void Bola::cekDinding(sf::FloatRect batas) {
+    if (!aktif) return;
+
+    // dinding kiri
+    if (pos.x - jari < batas.left) {
+        pos.x = batas.left + jari;
+        if (vel.x < 0.f)
+            vel.x = -vel.x * restitusi;
+    }
+
+    // dinding kanan
+    if (pos.x + jari > batas.left + batas.width) {
+        pos.x = batas.left + batas.width - jari;
+        if (vel.x > 0.f)
+            vel.x = -vel.x * restitusi;
+    }
+
+    // dinding atas
+    if (pos.y - jari < batas.top) {
+        pos.y = batas.top + jari;
+        if (vel.y < 0.f)
+            vel.y = -vel.y * restitusi;
+    }
+
+    // dnding bawah
+    if (pos.y + jari > batas.top + batas.height) {
+        pos.y = batas.top + batas.height - jari;
+        if (vel.y > 0.f)
+            vel.y = -vel.y * restitusi;
+    }
+}
+
 bool Bola::tabrak(Bola& lain) {
     if (!aktif || !lain.aktif) return false;
 
