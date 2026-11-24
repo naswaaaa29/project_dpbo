@@ -7,7 +7,7 @@ class Bola;
 class Stik {
     private:
         Tembakan bidik{0.f, 0.f};
-        float lajuMaks = 900.f; //kecepatan bola klo misalkan 100%
+        float lajuMaks = 1200.f; //kecepatan bola klo misalkan 100%
 
     public:
         void aturBidik(const Tembakan& t) {

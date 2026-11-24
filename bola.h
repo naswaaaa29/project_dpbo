@@ -8,7 +8,7 @@ public:
 
     void gambar(sf::RenderWindow& window) const;
     void gerak(float dt);
-    void cekDinding(sff:FloatRect batas);
+    void cekDinding(sf::FloatRect batas);
 
     Jenis jenis() const            { return jenisBola; }
     int   nomor() const            { return nomorBola; }
