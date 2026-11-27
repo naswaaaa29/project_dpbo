@@ -53,6 +53,8 @@ public:
         bidik = {0.f, 0.f};
     }
 
+    virtual void batalkanTembakan() {}
+
     protected:
         Tembakan bidik{0.f, 0.f};    
 
@@ -70,6 +72,8 @@ class PemainManusia : public Pemain {
         bool ambilTembakan(const Meja& meja,
                         const sf::RenderWindow& window,
                         Tembakan& hasil) override;
+
+        void batalkanTembakan() override { menahan = false; kekuatan = 0.f; bidik.kekuatan = 0.f; }
 
     private:
         bool  menahan = false;  

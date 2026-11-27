@@ -64,17 +64,12 @@ void Meja::update(float dt) {
     if (jumlahLangkah < 1) jumlahLangkah = 1;
     float h = dt / jumlahLangkah;
 
-    for(int i = 0; i < jumlahLangkah; ++i){
-        for (auto& b : bola){ // gerakan bola
-        	b.gerak(h);
-		}
+    for (int i = 0; i < jumlahLangkah; ++i) {
+        for (auto& b : bola) b.gerak(h);
+        for (auto& b : bola) b.cekDinding(areaMain());
+        cekTabrakanBola();
+        cekLubang();
     }
-    
-    for (auto& b :bola){
-    	b.cekDinding(areaMain()); //periksa tabrakan
-	}
-	cekTabrakanBola(); // cek tabrakan antar bola
-	cekLubang(); // cek apakah bola masuk
 }
 
 void Meja::cekTabrakanBola() {

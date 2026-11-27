@@ -1,4 +1,6 @@
 #include "billiard.h"
+#include <algorithm>
+#include <string>
 
 static void teksTengah(sf::Text& t, float cx, float cy) {
     sf::FloatRect b = t.getLocalBounds();
@@ -41,17 +43,69 @@ static void gambarBolaHias(sf::RenderWindow& w, sf::Vector2f p, float r, sf::Col
     w.draw(hl);
 }
 
+static const char* namaKelompok(Kelompok k){
+    if (k == Kelompok::polos) return "POLOS";
+    if (k == Kelompok::strip) return "STRIP";
+    return "BELUM";
+}
+
+static void gambarIkonKelompok(sf::RenderWindow& w, sf::Vector2f p, float r, Kelompok k){
+    sf::CircleShape c(r);
+    c.setOrigin(r, r);
+    c.setPosition(p);
+
+    if (k == Kelompok::polos) {
+        c.setFillColor(sf::Color(210, 40, 40));
+        w.draw(c);
+    } 
+    
+    else if (k == Kelompok::strip) {
+        c.setFillColor(sf::Color(245, 245, 245));
+        w.draw(c);
+        sf::RectangleShape pita({1.7f * r, r});
+        pita.setOrigin(0.85f * r, r / 2.f);
+        pita.setPosition(p);
+        pita.setFillColor(sf::Color(210, 40, 40));
+        w.draw(pita);
+    } 
+    
+    else {
+        c.setFillColor(sf::Color(60, 64, 74));
+        c.setOutlineThickness(2.f);
+        c.setOutlineColor(sf::Color(110, 116, 128));
+        w.draw(c);
+    }
+}
+
+static void gambarTombol(sf::RenderWindow& w, const sf::Font& f, bool adaFont, sf::FloatRect r, const char* label, unsigned ukuran, sf::Color normal, sf::Color sorot, bool hover) {
+    gambarRoundRect(w, r, 14.f, hover ? sorot : normal);
+    if (adaFont) {
+        sf::Text t(label, f, ukuran);
+        t.setFillColor(sf::Color::White);
+        teksTengah(t, r.left + r.width / 2.f, r.top + r.height / 2.f);
+        w.draw(t);
+    }
+}
+
 Billiard::Billiard()
     : window(sf::VideoMode(1000, 600), "Billiard - Kelompok 01"),
       meja({50.f, 75.f}, {900.f, 450.f}),
-      pemain("Pemain 1") {
+      pemain("Pemain 1"), pemain2("Pemain 2") {
     window.setFramerateLimit(60);
     meja.susunBola();
 
     tombolMulai = sf::FloatRect(380.f, 330.f, 240.f, 62.f);
     tombolLanjut = sf::FloatRect(530.f, 450.f, 200.f, 55.f);
 	tombolKembali = sf::FloatRect(270.f, 450.f, 200.f, 55.f);
+    
+    tombolJeda = sf::FloatRect(912.f, 16.f, 44.f, 40.f);
+    tombolLanjutkan = sf::FloatRect(350.f, 245.f, 300.f, 56.f);
+    tombolKeluarJeda = sf::FloatRect(350.f, 325.f, 300.f, 56.f);
+    tombolYa = sf::FloatRect(320.f, 320.f, 170.f, 52.f);
+    tombolTidak = sf::FloatRect(510.f, 320.f, 170.f, 52.f);
 
+    aktif = &pemain;
+    
     adaFont =
         font.loadFromFile("C:/Windows/Fonts/segoeuib.ttf") ||
         font.loadFromFile("C:/Windows/Fonts/arialbd.ttf")  ||
@@ -135,14 +189,142 @@ void Billiard::prosesEvent() {
                 }
             }
         }
+    
+        else if(status == Status::Bermain){
+            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape){
+                bukaJeda();
+            }
+
+            else if (event.type == sf::Event::MouseMoved){
+                sf::Vector2f m((float) event.mouseMove.x, (float) event.mouseMove.y);
+                hoverJeda = tombolJeda.contains(m);
+            }
+
+            else if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
+                sf::Vector2f m((float)event.mouseButton.x, (float)event.mouseButton.y);
+                if (tombolJeda.contains(m)) bukaJeda();
+            }
+        }
+
+        else if (status == Status::Jeda) {
+            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
+                lanjutDariJeda();
+            }
+
+            else if (event.type == sf::Event::MouseMoved) {
+                sf::Vector2f m((float)event.mouseMove.x, (float)event.mouseMove.y);
+                hoverLanjutkan  = tombolLanjutkan.contains(m);
+                hoverKeluarJeda = tombolKeluarJeda.contains(m);
+            }
+            else if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left) {
+                sf::Vector2f m((float)event.mouseButton.x, (float)event.mouseButton.y);
+                
+                if (tombolLanjutkan.contains(m)) {
+                    lanjutDariJeda();
+                }
+                
+                else if (tombolKeluarJeda.contains(m)) {
+                    hoverYa = hoverTidak = false;
+                    status = Status::KonfirmasiKeluar;
+                }
+            }
+        }
+
+        else if (status == Status::KonfirmasiKeluar) {
+            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape) {
+                status = Status::Jeda;
+            }
+
+            else if (event.type == sf::Event::MouseMoved) {
+                sf::Vector2f m((float)event.mouseMove.x, (float)event.mouseMove.y);
+                hoverYa = tombolYa.contains(m);
+                hoverTidak = tombolTidak.contains(m);
+            }
+            else if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left) {
+                sf::Vector2f m((float)event.mouseButton.x, (float)event.mouseButton.y);
+                
+                if (tombolYa.contains(m)) {
+                    keluarKeMenu();
+                }
+                
+                else if (tombolTidak.contains(m)) {
+                    status = Status::Jeda;
+                }
+            }
+        }
     }
 }
 
 void Billiard::mulaiGame() {
     meja.susunBola();
     pemain.reset();
+    pemain2.reset();
+    pemain.batalkanTembakan();
+    pemain2.batalkanTembakan();
+    aturan.reset();
+
+    aktif = &pemain;
+    pemain.setGiliran(true);
+    pemain2.setGiliran(false);
+
+    tembakanBerjalan = false;
+    notifSisa = 0.f;
+
     status = Status::Bermain;
     jam.restart();
+}
+
+void Billiard::bukaJeda() {
+    aktif -> batalkanTembakan();
+    hoverJeda = false;
+    hoverLanjutkan = hoverKeluarJeda = false;
+    status = Status::Jeda;
+}
+
+void Billiard::lanjutDariJeda(){
+    status = Status::Bermain;
+    jam.restart();
+}
+
+void Billiard::keluarKeMenu() {
+    aktif -> batalkanTembakan();
+    tembakanBerjalan = false;
+    notifSisa = 0.f;
+    hoverTombol = false;
+    status = Status::Menu;
+}
+
+void Billiard::gantiGiliran() {
+    Pemain* lawan = (aktif == &pemain) ? &pemain2 : &pemain;
+    aktif -> setGiliran(false);
+    lawan->setGiliran(true);
+    aktif = lawan;
+}
+
+void Billiard::selesaiTembakan() {
+    tembakanBerjalan = false;
+
+    for (int nomor : meja.ambilBolaMasuk()){
+        for(const Bola& b : meja.daftarBola()){
+            if (b.nomor() == nomor) {
+                aturan.bolaMasuk(b);
+                break;
+            }
+        }
+    }
+
+    Pemain* lawan = (aktif == &pemain) ? &pemain2 : &pemain;
+    bool belumPunyaKelompok = (aktif ->kelompok() == Kelompok::belum);
+
+    HasilGiliran hasil = aturan.evaluasi(*aktif, *lawan, meja);
+
+    if (belumPunyaKelompok && aktif->kelompok() != Kelompok::belum) {
+        notifTeks = aktif->nama() + " mendapat bola " + namaKelompok(aktif->kelompok()) + "  |  " + lawan->nama() + " mendapat bola " + namaKelompok(lawan ->kelompok());
+
+        notifSisa = 3.5f;
+    }
+
+    if (hasil != HasilGiliran::LanjutMain) gantiGiliran();
 }
 
 void Billiard::update(float dt) {
@@ -150,20 +332,25 @@ void Billiard::update(float dt) {
 
     meja.update(dt);
 
-    if (meja.semuaBolaBerhenti()) {
-        Tembakan t;
-        bool menembak = pemain.ambilTembakan(meja, window, t);
+    if (notifSisa > 0.f) notifSisa -= dt;
 
-        stik.aturBidik(pemain.bidikSaatIni());   
+    if (!meja.semuaBolaBerhenti()) return;
 
-        if (menembak) {
-            if (Bola* putih = meja.bolaPutih()) {
-                stik.aturBidik(t);
-                stik.pukul(*putih);
-            }
+    if(tembakanBerjalan) selesaiTembakan();
+
+    Tembakan t;
+    bool menembak = aktif-> ambilTembakan(meja, window, t);
+
+    stik.aturBidik(aktif->bidikSaatIni());
+
+    if (menembak) {
+        if (Bola* putih = meja.bolaPutih()) {
+            stik.aturBidik(t);
+            stik.pukul(*putih);
         }
     }
 }
+
 
 void Billiard::render() {
     if (status == Status::Menu) {
@@ -178,14 +365,131 @@ void Billiard::render() {
     window.clear(sf::Color(40, 42, 48));
     meja.gambar(window);
 
-    if (meja.semuaBolaBerhenti()) {
+    if (status == Status::Bermain && meja.semuaBolaBerhenti()) {
         if (Bola* putih = meja.bolaPutih())
             stik.gambar(window, *putih);
     }
 
+    gambarPanelKelompok();
+    if(status == Status::Bermain) gambarTombolJeda();
+    gambarNotif();
+
+    if (status == Status::Jeda) renderJeda();
+    else if (status == Status::KonfirmasiKeluar) renderKonfirmasi();
+
     window.display();
 }
 
+
+void Billiard::gambarTombolJeda() {
+    sf::Color warna = hoverJeda ? sf::Color (46, 204, 113) : sf::Color(75, 85, 95);
+    gambarRoundRect(window, tombolJeda, 10.f, warna);
+
+    float cx = tombolJeda.left + tombolJeda.width / 2.f;
+    float cy = tombolJeda.top + tombolJeda.height / 2.f;
+    for (int i = 0; i < 2; ++i){
+        sf::RectangleShape batang({6.f, 18.f});
+        batang.setOrigin(3.f, 9.f);
+        batang.setPosition(cx + (i == 0 ? -6.f : 6.f), cy);
+        batang.setFillColor(sf::Color::White);
+        window.draw(batang);
+    }
+}
+
+void Billiard::gambarPanelKelompok() {
+    const Pemain* daftar[2] = { &pemain, &pemain2 };
+
+    for (int i = 0; i < 2; ++i) {
+        const Pemain& p = *daftar[i];
+        sf::FloatRect kartu(i == 0 ? 50.f : 650.f, 543.f, 300.f, 44.f);
+
+        if (aktif == &p) {
+            gambarRoundRect(window,
+                sf::FloatRect(kartu.left - 2.f, kartu.top - 2.f, kartu.width + 4.f, kartu.height + 4.f),
+                14.f, sf::Color(46, 204, 113));
+        }
+        gambarRoundRect(window, kartu, 12.f, sf::Color(32, 35, 45));
+        gambarIkonKelompok(window, {kartu.left + 26.f, kartu.top + 22.f}, 12.f, p.kelompok());
+
+        if (adaFont) {
+            sf::Text nama(p.nama(), font, 15);
+            nama.setFillColor(sf::Color::White);
+            nama.setPosition(kartu.left + 48.f, kartu.top + 4.f);
+            window.draw(nama);
+
+            std::string ket = (p.kelompok() == Kelompok::belum)
+                ? std::string("Kelompok belum ditentukan")
+                : std::string(namaKelompok(p.kelompok())) + "   " + std::to_string(p.jumlahMasuk()) + "/7";
+            sf::Text t2(ket, font, 13);
+            t2.setFillColor(sf::Color(170, 176, 188));
+            t2.setPosition(kartu.left + 48.f, kartu.top + 23.f);
+            window.draw(t2);
+        }
+    }
+}
+
+void Billiard::gambarNotif() {
+    if (notifSisa <= 0.f || !adaFont) return;
+
+    float a = std::min(1.f, notifSisa / 0.6f);
+    sf::FloatRect kartu(180.f, 12.f, 640.f, 44.f);
+    gambarRoundRect(window, kartu, 14.f, sf::Color(32, 35, 45, (sf::Uint8)(235 * a)));
+
+    sf::Text t(notifTeks, font, 16);
+    t.setFillColor(sf::Color(46, 204, 113, (sf::Uint8)(255 * a)));
+    teksTengah(t, 500.f, 34.f);
+    window.draw(t);
+}
+
+void Billiard::renderJeda() {
+    sf::RectangleShape gelap({1000.f, 600.f});
+    gelap.setFillColor(sf::Color(0, 0, 0, 150));
+    window.draw(gelap);
+
+    gambarRoundRect(window, sf::FloatRect(300.f, 140.f, 400.f, 320.f), 24.f, sf::Color(32, 35, 45, 245));
+
+    if (adaFont) {
+        sf::Text judul("JEDA", font, 44);
+        judul.setFillColor(sf::Color(236, 240, 244));
+        teksTengah(judul, 500.f, 195.f);
+        window.draw(judul);
+
+        sf::Text hint("Tekan ESC untuk melanjutkan", font, 14);
+        hint.setFillColor(sf::Color(150, 156, 168));
+        teksTengah(hint, 500.f, 420.f);
+        window.draw(hint);
+    }
+
+    gambarTombol(window, font, adaFont, tombolLanjutkan, "LANJUTKAN", 22,
+                 sf::Color(39, 174, 96), sf::Color(46, 204, 113), hoverLanjutkan);
+    gambarTombol(window, font, adaFont, tombolKeluarJeda, "KELUAR", 22,
+                 sf::Color(150, 60, 60), sf::Color(190, 75, 75), hoverKeluarJeda);
+}
+
+void Billiard::renderKonfirmasi() {
+    sf::RectangleShape gelap({1000.f, 600.f});
+    gelap.setFillColor(sf::Color(0, 0, 0, 170));
+    window.draw(gelap);
+
+    gambarRoundRect(window, sf::FloatRect(280.f, 170.f, 440.f, 240.f), 24.f, sf::Color(32, 35, 45, 248));
+
+    if (adaFont) {
+        sf::Text judul("KELUAR KE MENU?", font, 30);
+        judul.setFillColor(sf::Color(236, 240, 244));
+        teksTengah(judul, 500.f, 225.f);
+        window.draw(judul);
+
+        sf::Text ket("Permainan saat ini akan berakhir.", font, 16);
+        ket.setFillColor(sf::Color(170, 176, 188));
+        teksTengah(ket, 500.f, 270.f);
+        window.draw(ket);
+    }
+
+    gambarTombol(window, font, adaFont, tombolYa, "YA", 22,
+                 sf::Color(150, 60, 60), sf::Color(190, 75, 75), hoverYa);
+    gambarTombol(window, font, adaFont, tombolTidak, "TIDAK", 22,
+                 sf::Color(75, 85, 95), sf::Color(100, 110, 120), hoverTidak);
+}
 
 void Billiard::renderAturan() {
     window.clear(sf::Color(24, 26, 34));
